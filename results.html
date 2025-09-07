@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ company_name or "Financials" }} - Profile</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+/* General */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f4f6f9;
+    color: #003366;
+}
+
+/* Container */
+.container {
+    max-width: 95%;            /* nearly full width */
+    margin: auto;
+    background: white;
+    padding: 50px 60px;        /* wider horizontal padding */
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Headings */
+h1, h2 { text-align:center; }
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #002b80;
+}
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0066cc;
+    margin-top: 0;
+}
+
+/* Logo */
+.logo {
+    display: block;
+    margin: 20px auto;
+    max-width: 180px;
+    height: auto;
+}
+
+/* Description */
+p.description {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    text-align:left;
+}
+
+/* Sections */
+.section {
+    margin-top: 30px;
+}
+.section h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+.section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+.section h5 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    color: #004080;
+}
+
+/* Tables */
+table.executives, .financial-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    table-layout: fixed;
+}
+table.executives th, table.executives td,
+.financial-table th, .financial-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    vertical-align: middle;
+}
+table.executives th {
+    background-color: #003366;
+    color: white;
+}
+.financial-table thead th {
+    background-color: #003366;
+    color: white;
+    font-weight: 700;
+    text-align: center;
+}
+.financial-table tbody td:first-child { text-align:left; }
+.financial-table tbody td:not(:first-child) { text-align:right; }
+.financial-table tbody tr:nth-child(even) { background-color:#f9fbff; }
+
+/* Collapsible */
+.collapsible-content {
+    display: none;
+    margin-top: 10px;
+}
+.caret {
+    display:inline-block;
+    margin-left:5px;
+    transition:transform 0.3s ease;
+}
+
+/* Back link */
+a.back-link {
+    display:inline-block;
+    margin-top:25px;
+    padding:12px 24px;
+    background-color:#0066cc;
+    color:white;
+    text-decoration:none;
+    font-weight:600;
+    border-radius:5px;
+    transition:background-color 0.3s ease;
+}
+a.back-link:hover { background-color:#004c99; }
+
+/* Live Breathing Button */
+.live-button {
+    display:inline-block;
+    padding:14px 28px;
+    font-weight:600;
+    font-size:1rem;
+    color:white;
+    background: linear-gradient(-45deg, #0066cc, #003366, #0066cc, #003366);
+    background-size:400% 400%;
+    border-radius:8px;
+    text-decoration:none;
+    animation: gradientBG 3s ease infinite;
+    transition: transform 0.2s ease;
+}
+.live-button:hover { transform: scale(1.05); }
+@keyframes gradientBG {
+    0% { background-position:0% 50%; }
+    50% { background-position:100% 50%; }
+    100% { background-position:0% 50%; }
+}
+
+/* Chart container flex layout for side-by-side charts */
+.chart-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+.chart-container {
+    flex: 1 1 48%; /* almost half width */
+    box-sizing: border-box;
+}
+.chart-container img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: block;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>{{ company_name }}</h1>
+    <h2>{{ ticker_symbol }}</h2>
+
+    {% if company_logo_base64 %}
+        <img src="data:image/png;base64,{{ company_logo_base64 }}" alt="{{ company_name }} Logo" class="logo"/>
+    {% elif logo_url %}
+        <img src="{{ logo_url }}" alt="{{ company_name }} Logo" class="logo"/>
+    {% endif %}
+
+    {% if description %}<p class="description">{{ description }}</p>{% endif %}
+
+    <div class="section">
+        <h3>Company Details</h3>
+        <p><strong>Sector:</strong> {{ sector }}</p>
+        <p><strong>Industry:</strong> {{ industry }}</p>
+        <p><strong>Website:</strong> <a href="{{ website }}" target="_blank">{{ website }}</a></p>
+    </div>
+
+    <div class="section">
+        <h3>Key Executives</h3>
+        {% if executives %}
+        <table class="executives">
+            <tr><th>Name</th><th>Title</th></tr>
+            {% for exec in executives %}
+            <tr><td>{{ exec.Name }}</td><td>{{ exec.Title }}</td></tr>
+            {% endfor %}
+        </table>
+        {% else %}<p>No executive data available.</p>{% endif %}
+    </div>
+
+    <div class="section">
+        <h3>Valuation Measures</h3>
+        {% if valuation_html %}
+            {{ valuation_html | safe }}
+        {% else %}
+            <p>No valuation data available.</p>
+        {% endif %}
+    </div>
+
+    <div style="text-align:center; margin:20px 0;">
+        <a href="{{ download_url }}" class="live-button">Download Detailed Company Financial Data</a>
+    </div>
+
+    <div class="section">
+        <h3>Scorecard Table</h3>
+        {% if scorecard_html %}
+            {{ scorecard_html | safe }}
+        {% else %}
+            <p>No scorecard data available.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h3 onclick="toggleSection(this)">Calculations <span class="caret">&#9660;</span></h3>
+        <div class="collapsible-content">
+
+            <h4>Financials</h4>
+            {% if table_html %}
+                {{ table_html | safe }}
+            {% else %}
+                <p>No financial data available.</p>
+            {% endif %}
+
+            <h4>Balance Sheet Metrics</h4>
+            {% if balance_sheet_html %}
+                {{ balance_sheet_html | safe }}
+            {% else %}
+                <p>No balance sheet data available.</p>
+            {% endif %}
+
+            <h4>Cash Flow</h4>
+            {% if cashflow_html %}
+                {{ cashflow_html | safe }}
+            {% else %}
+                <p>No cash flow data available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Summary tables and side-by-side charts -->
+
+
+    <div class="section">
+        <h4>Income Statement Summary</h4>
+        {% if income_summary_html %}
+            {{ income_summary_html | safe }}
+        {% endif %}
+        {% if income_charts %}
+            {% for i in range(0, income_charts|length, 2) %}
+                <div class="chart-row">
+                    <div class="chart-container">
+                        <img src="{{ income_charts[i] }}" alt="Income Chart" />
+                    </div>
+                    <div class="chart-container">
+                        {% if i + 1 < income_charts|length %}
+                            <img src="{{ income_charts[i + 1] }}" alt="Income Chart" />
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h4>Balance Sheet Summary</h4>
+        {% if balance_summary_html %}
+            {{ balance_summary_html | safe }}
+        {% endif %}
+        {% if balance_charts %}
+            {% for i in range(0, balance_charts|length, 2) %}
+                <div class="chart-row">
+                    <div class="chart-container">
+                        <img src="{{ balance_charts[i] }}" alt="Balance Chart" />
+                    </div>
+                    <div class="chart-container">
+                        {% if i + 1 < balance_charts|length %}
+                            <img src="{{ balance_charts[i + 1] }}" alt="Balance Chart" />
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h4>Cash Flow Summary</h4>
+        {% if cashflow_summary_html %}
+            {{ cashflow_summary_html | safe }}
+        {% endif %}
+        {% if cashflow_charts %}
+            {% for i in range(0, cashflow_charts|length, 2) %}
+                <div class="chart-row">
+                    <div class="chart-container">
+                        <img src="{{ cashflow_charts[i] }}" alt="Cash Flow Chart" />
+                    </div>
+                    <div class="chart-container">
+                        {% if i + 1 < cashflow_charts|length %}
+                            <img src="{{ cashflow_charts[i + 1] }}" alt="Cash Flow Chart" />
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <a class="back-link" href="/">&#8592; Back to Search</a>
+</div>
+
+<script>
+function toggleSection(header) {
+    const content = header.nextElementSibling;
+    const caret = header.querySelector(".caret");
+    if(content.style.display === "block") {
+        content.style.display = "none";
+        caret.style.transform = "rotate(0deg)";
+    } else {
+        content.style.display = "block";
+        caret.style.transform = "rotate(180deg)";
+    }
+}
+</script>
+</body>
+</html>
